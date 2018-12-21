@@ -7,9 +7,35 @@
 //
 
 #include <iostream>
+#include <algorithm>
+#include <vector>
 
-int main(int argc, const char * argv[]) {
-    // insert code here...
-    std::cout << "Hello, World!\n";
-    return 0;
-}
+#include "Player.h"
+#include "Pack.h"
+#include "Card.h"
+
+class Game {
+private:
+    std::vector<Player> players;
+    Pack pack;
+    int landLordIndex;
+    int callerIndex;
+    int lastWinnerIndex;
+    int currentPlayerIndex;
+    CardCombo currentCombo;
+public:
+    Game();
+    Game(Player *p1, Player *p2, Player *p3,
+         Pack &pack);
+    
+    bool isOverGame();
+    
+    void shufflePack();
+    
+    void deal();
+    
+    void callLandLord();
+    
+    //return next leader
+    int playRound();
+};
