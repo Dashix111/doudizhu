@@ -6,7 +6,6 @@
 //  Copyright © 2018 Bowen Dong. All rights reserved.
 //
 
-// github test
 #include <iostream>
 
 int main(int argc, const char * argv[]) {
