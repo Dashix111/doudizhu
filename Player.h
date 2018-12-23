@@ -8,12 +8,6 @@
 #include <string>
 #include <vector>
 
-enum CardCombo {
-    error, zero, single, pair, trio, straight, pairStraight, trioStraight,
-    trioSingle, trioPair, airplaneSingle, airplanePair, fourSingle,
-    fourPair, bomb, rocket
-};
-
 class Player {
 private:
     bool isLandlord;
