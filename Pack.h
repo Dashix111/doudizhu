@@ -11,7 +11,11 @@ class Pack {
 public:
     Pack();
     
-    //initialize by input
+    //initialize by input, the first line of input should be
+    //  the index of the upCard, then each line should contain
+    //  the rank and suit of a Card in the format "RANK of SUIT"
+    //  e.g. three of spade
+    //each pack should contain PACK_SIZE = 54 cards
     Pack(std::istream& packInput);
 
     //Returns the next card in the pack and increments the next index

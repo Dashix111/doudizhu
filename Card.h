@@ -19,7 +19,7 @@ enum Rank {
 };
 
 enum Suit {
-    spade, heart, club, diamond
+    spade, heart, club, diamond, joker
 };
 
 class Card {
