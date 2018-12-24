@@ -35,7 +35,7 @@ bool operator!=(const Card &lhs, const Card &rhs) {
 }
 
 std::ostream & operator<<(std::ostream &os, const Card &card){
-    std::string suit;
+    std::string suit, rank;
     switch (card.getSuit()) {
         case spade:
             suit = "spade";
@@ -53,8 +53,59 @@ std::ostream & operator<<(std::ostream &os, const Card &card){
             suit = "Joker";
             break;
     }
+    
+    switch (card.getRank()) {
+        case three:
+            rank = "three";
+            break;
+        case four:
+            rank = "four";
+            break;
+        case five:
+            rank = "five";
+            break;
+        case six:
+            rank = "six";
+            break;
+        case seven:
+            rank = "seven";
+            break;
+        case eight:
+            rank = "eight";
+            break;
+        case nine:
+            rank = "nine";
+            break;
+        case ten:
+            rank = "ten";
+            break;
+        case jack:
+            rank = "jack";
+            break;
+        case queen:
+            rank = "queen";
+            break;
+        case king:
+            rank = "king";
+            break;
+        case ace:
+            rank = "ace";
+            break;
+        case two:
+            rank = "two";
+            break;
+        case bJoker:
+            rank = "bJoker";
+            break;
+        case rJoker:
+            rank = "rJoker";
+            break;
+            
+        default:
+            break;
+    }
 
-    os << card.getRank() << " of " << suit << '\n';
+    os << rank << " of " << suit << '\n';
     return os;
 }
 
