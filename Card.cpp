@@ -47,7 +47,7 @@ std::ostream & operator<<(std::ostream &os, const Card &card){
             suit = "diamond";
             break;
         case club:
-            suit = "diamond";
+            suit = "club";
             break;
         default:
             suit = "Joker";
@@ -109,6 +109,65 @@ bool operator>(const CardCombo &lhs, const CardCombo &rhs) {
     
     assert(false);
     return false;
+}
+std::ostream & operator<<(std::ostream &os, const CardCombo &combo){
+    std::string type;
+    switch (combo.getType()) {
+        case zero:
+            type = "zero";
+            break;
+        case single:
+            type = "single";
+            break;
+        case pair:
+            type = "pair";
+            break;
+        case trio:
+            type = "trio";
+            break;
+        case straight:
+            type = "straight";
+            break;
+        case pairStraight:
+            type = "pairStraight";
+            break;
+        case trioStraight:
+            type = "trioStraight";
+            break;
+        case trioSingle:
+            type = "trioSingle";
+            break;
+        case trioPair:
+            type = "trioPair";
+            break;
+        case airplanePair:
+            type = "airplanePair";
+            break;
+        case airplaneSingle:
+            type = "airplaneSingle";
+            break;
+        case fourSingles:
+            type = "fourSingles";
+            break;
+        case fourPairs:
+            type = "fourPairs";
+            break;
+        case bomb:
+            type = "bomb";
+            break;
+        case rocket:
+            type = "rocket";
+            break;
+        
+        default:
+            type = "error";
+            break;
+    }
+    os << type << '\n';
+    for(int i = 0; i < combo.getNumCards(); i++){
+        os << combo.getCards()[i];
+    }
+    return os<<'\n';
 }
 
 //Require sorted in descending order
@@ -284,11 +343,12 @@ int CardCombo::calculateValue() {
 }
 
 CardCombo::CardCombo(const std::vector<Card> &cardsIn) {
+    numCards = (int)cardsIn.size();
     for(int i = 0; i < numCards; i++) {
-        cards[i] = cardsIn[i];
+        cards.push_back(cardsIn[i]);
     }
     std::sort(cards.rbegin(), cards.rend());
-    numCards = (int)cardsIn.size();
+    
     
     if(cards.size() == 0) {
         type = zero;
@@ -303,14 +363,16 @@ CardCombo::CardCombo(const std::vector<Card> &cardsIn) {
                 type = rocket;
             } else if (cards[0] == cards[1]) {
                 type = pair;
+            } else {
+                type = error;
             }
-            type = error;
         } else if (cards.size() == 3) {
             if(cards[0] == cards[1] &&
                cards[1] == cards[2]) {
                 type = trio;
+            } else {
+                type = error;
             }
-            type = error;
         } else if (cards.size() == 4) {
             if(cards[1] == cards[2]) {
                 if(cards[0] == cards[1]) {
@@ -322,7 +384,10 @@ CardCombo::CardCombo(const std::vector<Card> &cardsIn) {
                 } else if (cards[2] == cards[3]) {
                     type = trioSingle;
                     compareCard = cards[1];
+                } else {
+                    type = error;
                 }
+            } else {
                 type = error;
             }
         } else if (cards.size() == 5) {
@@ -333,6 +398,8 @@ CardCombo::CardCombo(const std::vector<Card> &cardsIn) {
                 } else if (cards[2] == cards[4]) {
                     compareCard = cards[2];
                     type = trioPair;
+                } else {
+                    type = error;
                 }
             } else if (isStraight(cardsIn)) {
                 type = straight;
@@ -349,15 +416,19 @@ CardCombo::CardCombo(const std::vector<Card> &cardsIn) {
                         compareCard = cards[2];
                     } else if (isPairStraight(cards)) {
                         type = pairStraight;
+                    } else {
+                        type = error;
                     }
                 } else if (isTrioStraight(cards)) {
                     type = trioStraight;
+                } else {
+                    type = error;
                 }
-                type = error;
             } else if(isStraight(cards)) {
                 type = straight;
+            } else {
+                type = error;
             }
-            type = error;
         } else if (cards.size() == 8) {
             int aps = isAirPlaneSingle(cards);
             int app = isAirPlanePair(cards);
@@ -374,8 +445,9 @@ CardCombo::CardCombo(const std::vector<Card> &cardsIn) {
                     compareCard = cards[4];
                 } else if (isPairStraight(cards)) {
                     type = pairStraight;
+                } else {
+                    type = error;
                 }
-                type = error;
             } else if (isStraight(cards)) {
                 type = straight;
             } else if (isTrioStraight(cards)) {
@@ -388,8 +460,9 @@ CardCombo::CardCombo(const std::vector<Card> &cardsIn) {
                 compareCard = cards[app];
             } else if(isStraight(cards)) {
                 type = straight;
+            } else {
+                type = error;
             }
-            type = error;
         } else {
             int aps = isAirPlaneSingle(cards);
             int app = isAirPlanePair(cards);
@@ -406,8 +479,9 @@ CardCombo::CardCombo(const std::vector<Card> &cardsIn) {
             } else if (app != -1) {
                 type = airplanePair;
                 compareCard = cards[app];
+            } else {
+                type = error;
             }
-            type = error;
         }
     }
     

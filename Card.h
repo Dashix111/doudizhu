@@ -66,13 +66,16 @@ public:
     CardComboType getType() const {return type;}
     Card getCompareCard() const {return compareCard;}
     std::vector<Card> getCards() const {return cards;}
+    
 };
+
 
 bool isSameType(const CardCombo &a, const CardCombo &b);
 
 //Require same type or bombs/rockets
 bool operator<(const CardCombo &lhs, const CardCombo &rhs);
 bool operator>(const CardCombo &lhs, const CardCombo &rhs);
+std::ostream & operator<<(std::ostream &os, const CardCombo &combo);
 bool isStraight(const std::vector<Card> &cards);
 bool isPairStraight(const std::vector<Card> &cards);
 bool isTrioStraight(const std::vector<Card> &cards);
