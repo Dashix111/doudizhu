@@ -19,7 +19,7 @@ Pack::Pack() {
     cards.push_back(Card(rJoker, joker));
     
     for(int i = 0; i < 3; i++) {
-        cards.push_back(cards[51+i]);
+        landLordCards.push_back(cards[51+i]);
     }
     
     next = 0;
@@ -114,11 +114,32 @@ void Pack::shuffle() {
     }
 }
 
-int Pack::pickUpcard() {
+void Pack::pickUpcard() {
     srand(time(0));
-    return rand() % PACK_SIZE;
+    upCard = rand() % PACK_SIZE;
 }
 
 bool Pack::empty() const {
     return cards.empty();
+}
+
+int Pack::getNext() const {
+    return next;
+}
+
+int Pack::getUpcard() const {
+    return upCard;
+}
+
+void Pack::printPack() const {
+    std::cout << "Pack Cards:\n";
+    for(Card c : cards) {
+        std::cout << c;
+    }
+    std::cout << "\nLandlord Cards:\n";
+    for(Card c : landLordCards) {
+        std::cout << c;
+    }
+    std::cout << "Next card index: " << getNext() << '\n';
+    std::cout << "Upcard index: " << getUpcard() << '\n';
 }

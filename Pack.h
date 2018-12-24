@@ -29,13 +29,23 @@ public:
     void shuffle();
     
     //select card that faces up
-    int pickUpcard();
+    void pickUpcard();
 
     //returns true if there are no more cards left in the pack
     bool empty() const;
+    
+    //for testing purposes
+    void printPack() const;
+    
+    //for testing purposes
+    int getNext() const;
+    
+    //for testing purposes
+    int getUpcard() const;
+    
+    static const int PACK_SIZE = 54;
 
 private:
-    static const int PACK_SIZE = 54;
     std::vector<Card> cards;
     std::vector<Card> landLordCards;
     int next; //index of next card to be dealt
