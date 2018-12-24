@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <cassert>
+#include <algorithm>
 
 #include "Card.h"
 #include "Pack.h"
@@ -90,23 +91,35 @@ Pack::Pack(std::istream &packInput) {
 }
 
 Card Pack::dealOne() {
-    
-    return Card();
+    assert(next < PACK_SIZE);
+    return cards[next++];
 }
 
 void Pack::reset() {
-    
+    next = 0;
 }
 
 void Pack::shuffle() {
+    assert(cards.size() == PACK_SIZE);
+    srand(time(0));
     
+    for(int i = 0; i < PACK_SIZE; i++) {
+        int r = i + (rand() % (PACK_SIZE - i));
+        std::swap(cards[i], cards[r]);
+    }
+    
+    landLordCards.clear();
+    for(int i = 0; i < 2; i++) {
+        landLordCards.push_back(cards[51+i]);
+    }
 }
 
-int pickUpcard() {
-    return 0;
+int Pack::pickUpcard() {
+    srand(time(0));
+    return rand() % PACK_SIZE;
 }
 
 bool Pack::empty() const {
     
-    return false;
+    return cards.empty();
 }
