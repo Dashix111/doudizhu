@@ -56,8 +56,10 @@ Pack::Pack(std::istream &packInput) {
             r = queen;
         } else if (rankInput == "king") {
             r = king;
-        } else if (rankInput == "Ace") {
+        } else if (rankInput == "ace") {
             r = ace;
+        } else if (rankInput == "two") {
+            r = two;
         } else if (rankInput == "bjoker") {
             r = bJoker;
         } else if (rankInput == "rjoker") {
@@ -74,6 +76,8 @@ Pack::Pack(std::istream &packInput) {
             s = club;
         } else if (suitInput == "diamond") {
             s = diamond;
+        } else if (suitInput == "joker"){
+            s = joker;
         } else {
             assert(false);
         }
@@ -81,10 +85,11 @@ Pack::Pack(std::istream &packInput) {
         cards.push_back(Card(r, s));
     }
     
-    assert(cards.size() == PACK_SIZE);
+    assert(cards.size() == Pack::PACK_SIZE);
     
+    landLordCards.clear();
     for(int i = 0; i < 3; i++) {
-        landLordCards[i] = cards[51+i];
+        landLordCards.push_back(cards[51+i]);
     }
     
     next = 0;
@@ -109,7 +114,7 @@ void Pack::shuffle() {
     }
     
     landLordCards.clear();
-    for(int i = 0; i < 2; i++) {
+    for(int i = 0; i < 3; i++) {
         landLordCards.push_back(cards[51+i]);
     }
 }
@@ -120,7 +125,7 @@ void Pack::pickUpcard() {
 }
 
 bool Pack::empty() const {
-    return cards.empty();
+    return next == PACK_SIZE;
 }
 
 int Pack::getNext() const {
