@@ -10,7 +10,7 @@
 
 Pack::Pack() {
     for(Suit s = spade; s <= diamond; s = Suit(s+1)) {
-        for(Rank r = three; r <= ace; r = Rank(r+1)) {
+        for(Rank r = three; r <= two; r = Rank(r+1)) {
             cards.push_back(Card(r, s));
         }
     }
@@ -18,7 +18,7 @@ Pack::Pack() {
     cards.push_back(Card(rJoker, joker));
     
     for(int i = 0; i < 3; i++) {
-        landLordCards[i] = cards[51+i];
+        cards.push_back(cards[51+i]);
     }
     
     next = 0;
