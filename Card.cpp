@@ -293,10 +293,12 @@ int isAirPlaneSingle(const std::vector<Card> &cards) {
                 compareCardIndex = i - 1;
             }
         }
+        
         if(cards[i].getRank() == previousRank) {
             currentSize++;
+            
         } else {
-            numSingle++;
+            numSingle+=currentSize;
             currentSize = 1;
             previousRank = cards[i].getRank();
         }
@@ -310,7 +312,6 @@ int isAirPlaneSingle(const std::vector<Card> &cards) {
     if(numSingle == numTrio && numTrio > 1) {
         return compareCardIndex;
     }
-    
     return -1;
 }
 
@@ -458,26 +459,16 @@ CardCombo::CardCombo(const std::vector<Card> &cardsIn) {
                 type = error;
             }
         } else if (cards.size() == 6) {
-            if(cards[0] == cards[1] && cards[4] == cards[5]) {
-                if(cards[2] == cards[3]) {
-                    if(cards[2] == cards[1]) {
-                        type = fourSingles;
-                    } else if (cards[2] == cards[4]) {
-                        type = fourSingles;
-                        compareCard = cards[2];
-                    } else if (isPairStraight(cards)) {
-                        type = pairStraight;
-                    } else {
-                        type = error;
-                    }
-                } else if (isTrioStraight(cards)) {
-                    type = trioStraight;
-                } else {
-                    type = error;
-                }
-            } else if(isStraight(cards)) {
+            if(isStraight(cards)){
                 type = straight;
-            } else {
+            }else if(isTrioStraight(cards)){
+                type = trioStraight;
+            }else if(isPairStraight(cards)){
+                type = pairStraight;
+            }else if(cards[0]==cards[3] || cards[1]==cards[4] || cards[2]== cards[5]){
+                type = fourSingles;
+                compareCard = cards[2];
+            }else{
                 type = error;
             }
         } else if (cards.size() == 8) {
