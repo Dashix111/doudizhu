@@ -60,7 +60,7 @@ public:
     CardComboType getType() const {return type;}
     Card getCompareCard() const {return compareCard;}
     std::vector<Card> getCards() const {return cards;}
-    
+    void printCombo() const;
 };
 
 

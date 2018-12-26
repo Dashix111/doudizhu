@@ -529,3 +529,9 @@ CardCombo::CardCombo(const std::vector<Card> &cardsIn) {
     
     value = calculateValue();
 }
+
+void CardCombo::printCombo() const {
+    for(int i = 0; i < numCards; i++) {
+        std::cout << cards[i];
+    }
+}

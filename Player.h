@@ -8,25 +8,46 @@
 #include <string>
 #include <vector>
 
+enum Position {
+    landlord = 0, earlyHand, lateHand
+};
+
 class Player {
 private:
-    bool isLandlord;
     std::vector<Card> hand;
+    std::string name;
+    Position pos;
 public:
+    Player();
+    Player(std::string nameIn, Position posIn);
+    
     //returns player's name
-    virtual const std::string & getName() const = 0;
+    const std::string & getName() const;
+    
+    const std::vector<Card> & getHand() const;
+    
+    const Position getPosition() const;
 
     //adds Card c to Player's hand
-    virtual void addCard(const Card &c) = 0;
+    void addCard(const Card &c);
+    
+    //remove and return hand[index]
+    Card popCard(int index);
+    
+    //sort hand in descending order
+    void sortHand();
+    
+    //bidding for landlord wiht value 0, 1, 2, 3
+    //the highest bidder will be the landlord
+    virtual int bid(int currentBid) = 0;
 
-    //Leads one Card from Player's hand according to their strategy
-    //"Lead" means to play the first Card in a trick.
-    //The card  is removed the player's hand.
-    virtual std::vector<Card> leadCard() = 0;
+    //"Lead" means to play the first set Cards in a trick.
+    //Cards are removed from the player's hand.
+    virtual CardCombo leadCard() = 0;
 
-    //Plays one Card from Player's hand according to their strategy.
-    //The card is removed from the player's hand.
-    virtual std::vector<Card> playCard(const std::vector<Card> &leadCards) = 0;
+    //Plays a set of Cards from Player's hand according to their strategy.
+    //Cards are removed from the player's hand.
+    virtual CardCombo playCard(const CardCombo &c) = 0;
 
     //destructor
     virtual ~Player() {}
