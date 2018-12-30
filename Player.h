@@ -17,6 +17,7 @@ private:
     std::vector<Card> hand;
     std::string name;
     Position pos;
+
 public:
     Player();
     Player(std::string nameIn, Position posIn);
@@ -26,10 +27,12 @@ public:
     
     const std::vector<Card> & getHand() const;
     
+    std::vector<Card> & getHand();
+
     const Position getPosition() const;
 
     //adds Card c to Player's hand
-    void addCard(const Card &c);
+    virtual void addCard(const Card &c);
     
     //remove and return hand[index]
     Card popCard(int index);
