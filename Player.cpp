@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iostream>
 #include <cassert>
+#include <numeric>
 
 #include "Player.h"
 #include "Card.h"
@@ -216,8 +217,9 @@ bool noRocket(const std::vector<Card> &cardsKnown) {
 }
 
 //REQUIRE sorted cards
-//return the index of the first card of the bomb in cards or -1
-int getIndexOfBiggest(const std::vector<Card> &cards, CardComboType type) {
+//return the index of the first card of the biggest combo in cards or -1
+int getIndexOfBiggest(const std::vector<Card> &cards, CardComboType type,
+                      int length = 0) {
     if(type == bomb){
         int count = 1;
         for(int i = 1; i < cards.size(); i++) {
@@ -228,7 +230,6 @@ int getIndexOfBiggest(const std::vector<Card> &cards, CardComboType type) {
             } else {
                 count = 1;
             }
-            
         }
         return -1;
     }
@@ -284,6 +285,9 @@ int SimpleBot::bid(int currentBid) {
 
 
 CardCombo SimpleBot::findBestCards(std::vector<Card> &hand) {
+    //play airPlaneSingle, airplanePair, trioSingle, trioPair first
+    //best they can take other cards with them
+    //then play cards with the lowest value 
     
     return CardCombo();
 }
@@ -384,15 +388,501 @@ CardCombo SimpleBot::leadCard() {
                     }
                 }
                 //straight
+                std::vector<Card> str; //straight
+                remainingCards.clear();
+                //find straights in hand to their longest extent, and check
+                //whether they are the biggest, if they are check whether the
+                //remaining cards are a combo, and check whether subsets of
+                //the straight are also the biggest and the remaining cards
+                int startingIndex = 0;
+                for(int i = 0; i < hand.size(); i++) {
+                    if(!(hand[i].getRank() > ace)) {
+                        startingIndex = i;
+                        break;
+                    }
+                }
+                
+                while(startingIndex < hand.size() - 5) {
+                    for(int i = 0; i < hand.size(); i++) {
+                        if(i >= startingIndex) {
+                            if(str.empty() || hand[i].getRank() == Rank(str[str.size()-1].getRank()-1)) {
+                                str.push_back(hand[i]);
+                            } else {
+                                startingIndex = i;
+                                remainingCards.insert(remainingCards.end(),
+                                                      str.begin()+i, str.end());
+                                break;
+                                
+                            }
+                        } else {
+                            remainingCards.push_back(hand[i]);
+                        }
+                    }
+                    
+                    if(str.size() >= 5) {
+                        int reducedLength = (int)str.size() - 5;
+                        for(int i = 0; i <= reducedLength; i++) {
+                            for(int a = 0; a < i; ++a) {
+                                int b = i - a;
+                                indexUC = getIndexOfBiggest(cardsUnknown,
+                                                            straight,
+                                                            (int)str.size()-i);
+                                if(cardsUnknown[indexUC] > str[a]) {
+                                    break;
+                                }
+                                std::vector<Card> strTemp(str.begin()+a,
+                                                            str.begin()+
+                                                            (str.size()-1-b));
+                                std::vector<Card> rCardsTemp(
+                                    remainingCards.begin(),
+                                    remainingCards.end());
+                                rCardsTemp.insert(rCardsTemp.begin()+
+                                                      startingIndex,
+                                                      str.begin()+str.size()-b,
+                                                      str.end());
+                                rCardsTemp.insert(rCardsTemp.begin()+
+                                                      startingIndex,
+                                                      str.begin(),
+                                                      str.begin()+a);
+                                if(CardCombo(rCardsTemp).getType() != error) {
+                                    combo = CardCombo(strTemp);
+                                    hand = rCardsTemp;
+                                    return combo;
+                                } // end if(CardCombo()...)
+                            } //end for(int a...)
+                        } //end for(int i ...)
+                    } //end if(str.size()...)
+                    
+                    str.clear();
+                    remainingCards.clear();
+                }
+                
                 //pairStraight
+                str.clear();
+                remainingCards.clear();
+                startingIndex = 0;
+                for(int i = 0; i < hand.size(); i++) {
+                    if(!(hand[i].getRank() > ace)) {
+                        startingIndex = i;
+                        break;
+                    }
+                }
+                while(startingIndex < hand.size() - 6) {
+                    for(int i = 0; i < hand.size(); i++) {
+                        if(i >= startingIndex) {
+                            if(str.empty() ||
+                               (str.size() % 2 == 0 && hand[i].getRank() ==
+                                Rank(str[str.size()-1].getRank()-1)) ||
+                               (str.size() % 2 == 1 && hand[i] ==
+                                str[str.size()-1])) {
+                                str.push_back(hand[i]);
+                            } else {
+                                startingIndex = i;
+                                remainingCards.insert(remainingCards.end(),
+                                                      str.begin()+i, str.end());
+                                break;
+                                
+                            }
+                        } else {
+                            remainingCards.push_back(hand[i]);
+                        }
+                    }
+                    
+                    if(str.size() % 2 == 1) {
+                        str.pop_back();
+                    }
+                    
+                    if(str.size() >= 6) {
+                        int reducibleLength = (int)str.size() - 6;
+                        for(int i = 0; i <= reducibleLength; i += 2) {
+                            for(int a = 0; a < i; a += 2) {
+                                int b = i - a;
+                                indexUC = getIndexOfBiggest(cardsUnknown,
+                                                            pairStraight, (int)
+                                                            (str.size()-i)/2);
+                                if(cardsUnknown[indexUC] > str[a]) {
+                                    break;
+                                }
+                                std::vector<Card> strTemp(str.begin()+a,
+                                                          str.begin()+
+                                                          (str.size()-1-b));
+                                std::vector<Card> rCardsTemp(
+                                    remainingCards.begin(),
+                                    remainingCards.end());
+                                rCardsTemp.insert(rCardsTemp.begin()+
+                                                  startingIndex,
+                                                  str.begin()+str.size()-b,
+                                                  str.end());
+                                rCardsTemp.insert(rCardsTemp.begin()+
+                                                  startingIndex,
+                                                  str.begin(),
+                                                  str.begin()+a);
+                                if(CardCombo(rCardsTemp).getType() != error) {
+                                    combo = CardCombo(strTemp);
+                                    hand = rCardsTemp;
+                                    return combo;
+                                } // end if(CardCombo()...)
+                            } //end for(int a...)
+                        } //end for(int i ...)
+                    } //end if(str.size()...)
+                    str.clear();
+                    remainingCards.clear();
+                }
+                
                 //trioStraight
+                str.clear();
+                remainingCards.clear();
+                startingIndex = 0;
+                for(int i = 0; i < hand.size(); i++) {
+                    if(!(hand[i].getRank() > ace)) {
+                        startingIndex = i;
+                        break;
+                    }
+                }
+                while(startingIndex < hand.size() - 6) {
+                    for(int i = 0; i < hand.size(); i++) {
+                        if(i >= startingIndex) {
+                            if(str.empty() ||
+                               (str.size() % 3 == 0 && hand[i].getRank() ==
+                                Rank(str[str.size()-1].getRank()-1)) ||
+                               ((str.size() % 3 == 1 || str.size() % 3 == 2)
+                                && hand[i] == str[str.size()-1])) {
+                                   str.push_back(hand[i]);
+                               } else {
+                                   startingIndex = i;
+                                   remainingCards.insert(remainingCards.end(),
+                                                         str.begin()+i,
+                                                         str.end());
+                                   break;
+                               }
+                        } else {
+                            remainingCards.push_back(hand[i]);
+                        }
+                    }
+                    
+                    while(str.size() % 3 != 0) {
+                        str.pop_back();
+                    }
+                    
+                    if(str.size() >= 6) {
+                        int reducibleLength = (int)str.size() - 6;
+                        for(int i = 0; i <= reducibleLength; i += 3) {
+                            for(int a = 0; a < i; a += 3) {
+                                int b = i - a;
+                                indexUC = getIndexOfBiggest(cardsUnknown,
+                                                            trioStraight, (int)
+                                                            (str.size()-i)/3);
+                                if(cardsUnknown[indexUC] > str[a]) {
+                                    break;
+                                }
+                                std::vector<Card> strTemp(str.begin()+a,
+                                                          str.begin()+
+                                                          (str.size()-1-b));
+                                std::vector<Card> rCardsTemp(
+                                     remainingCards.begin(),
+                                     remainingCards.end());
+                                rCardsTemp.insert(rCardsTemp.begin()+
+                                                  startingIndex,
+                                                  str.begin()+str.size()-b,
+                                                  str.end());
+                                rCardsTemp.insert(rCardsTemp.begin()+
+                                                  startingIndex,
+                                                  str.begin(),
+                                                  str.begin()+a);
+                                if(CardCombo(rCardsTemp).getType() != error) {
+                                    combo = CardCombo(strTemp);
+                                    hand = rCardsTemp;
+                                    return combo;
+                                } // end if(CardCombo()...)
+                            } //end for(int a...)
+                        } //end for(int i ...)
+                    } //end if(str.size()...)
+                    str.clear();
+                    remainingCards.clear();
+                }
                 //trioSingle,
+                indexHand = getIndexOfBiggest(hand, trio);
+                indexUC = getIndexOfBiggest(cardsUnknown, trio);
+                if(indexHand != -1 &&
+                   !(hand[indexHand] < cardsUnknown[indexUC])) {
+                    remainingCards.clear();
+                    for(int kickIndex = 0; kickIndex < hand.size(); kickIndex++){
+                        if(kickIndex >= indexHand && kickIndex <= indexHand+2) {
+                            continue;
+                        }
+                        for(int i = 0; i < hand.size(); i++) {
+                            if((i < indexHand || i > indexHand+2) &&
+                               i != kickIndex) {
+                                remainingCards.push_back(hand[i]);
+                            }
+                        }
+                        if(CardCombo(remainingCards).getType() != error) {
+                            combo = CardCombo(std::vector<Card>(hand.begin()+indexHand, hand.begin()+indexHand+3));
+                            hand = remainingCards;
+                            return combo;
+                        }
+                    }
+                }
                 //trioPair
-                //airplaneSingle,
-                //airPlanePair
+                indexHand = getIndexOfBiggest(hand, trio);
+                indexUC = getIndexOfBiggest(cardsUnknown, trio);
+                if(indexHand != -1 &&
+                   !(hand[indexHand] < cardsUnknown[indexUC])) {
+                    remainingCards.clear();
+                    std::vector<Card> trioPair;
+                    
+                    for(int i = 0; i < hand.size(); i++) {
+                        if(i >= indexHand && i <= indexHand+2) {
+                            trioPair.push_back(hand[i]);
+                        } else {
+                            remainingCards.push_back(hand[i]);
+                        }
+                    }
+                    
+                    for(int i = 1; i < remainingCards.size(); i++) {
+                        if(remainingCards[i] == remainingCards[i-1]) {
+                            std::vector<Card> rCardsTemp;
+                            rCardsTemp.insert(rCardsTemp.end(),
+                                              remainingCards.begin(),
+                                              remainingCards.begin()+i-1);
+                            rCardsTemp.insert(rCardsTemp.end(),
+                                              remainingCards.begin()+i+1,
+                                              remainingCards.end());
+                            if(CardCombo(rCardsTemp).getType() != error) {
+                                trioPair.push_back(remainingCards[i-1]);
+                                trioPair.push_back(remainingCards[i]);
+                                combo = CardCombo(trioPair);
+                                hand = rCardsTemp;
+                                return combo;
+                            }
+                            
+                        }
+                    }
+                }
+                //airplaneSingle
+                str.clear();
+                remainingCards.clear();
+                startingIndex = 0;
+                for(int i = 0; i < hand.size(); i++) {
+                    if(!(hand[i].getRank() > ace)) {
+                        startingIndex = i;
+                        break;
+                    }
+                }
+                while(startingIndex < hand.size() - 6) {
+                    for(int i = 0; i < hand.size(); i++) {
+                        if(i >= startingIndex) {
+                            if(str.empty() ||
+                               (str.size() % 3 == 0 && hand[i].getRank() ==
+                                Rank(str[str.size()-1].getRank()-1)) ||
+                               ((str.size() % 3 == 1 || str.size() % 3 == 2)
+                                && hand[i] == str[str.size()-1])) {
+                                   str.push_back(hand[i]);
+                               } else {
+                                   startingIndex = i;
+                                   remainingCards.insert(remainingCards.end(),
+                                                         str.begin()+i,
+                                                         str.end());
+                                   break;
+                               }
+                        } else {
+                            remainingCards.push_back(hand[i]);
+                        }
+                    }
+                    
+                    while(str.size() % 3 != 0) {
+                        str.pop_back();
+                    }
+                    
+                    if(str.size() >= 6) {
+                        int reducibleLength = (int)str.size() - 6;
+                        for(int i = 0; i <= reducibleLength; i += 3) {
+                            for(int a = 0; a < i; a += 3) {
+                                int b = i - a;
+                                indexUC = getIndexOfBiggest(cardsUnknown,
+                                                            trioSingle, (int)
+                                                            (str.size()-i)/3);
+                                if(cardsUnknown[indexUC] > str[a]) {
+                                    break;
+                                }
+                                std::vector<Card> strTemp(str.begin()+a,
+                                                          str.begin()+
+                                                          (str.size()-1-b));
+                                std::vector<Card> rCardsTemp(
+                                    remainingCards.begin(),
+                                    remainingCards.end());
+                                rCardsTemp.insert(rCardsTemp.begin()+
+                                                  startingIndex,
+                                                  str.begin()+str.size()-b,
+                                                  str.end());
+                                rCardsTemp.insert(rCardsTemp.begin()+
+                                                  startingIndex,
+                                                  str.begin(),
+                                                  str.begin()+a);
+                                
+                                if(rCardsTemp.size() <= 2) assert(false);
+                                
+                                //need to generate all combination of kick cards
+                                std::string bitMask((str.size()-i)/3, 1);
+                                bitMask.resize(rCardsTemp.size(), 0);
+                                std::vector<Card> temp;
+                                std::vector<Card> kickCards;
+                                
+                                do {
+                                    temp.clear();
+                                    kickCards.clear();
+                                    for(int i = 0; i < rCardsTemp.size(); i++) {
+                                        if(bitMask[i]) {
+                                            kickCards.push_back(rCardsTemp[i]);
+                                        } else {
+                                            temp.push_back(rCardsTemp[i]);
+                                        }
+                                    }
+                                    
+                                    if(CardCombo(temp).getType() != error) {
+                                        strTemp.insert(strTemp.end(), kickCards.begin(), kickCards.end());
+                                        std::sort(strTemp.rbegin(), strTemp.rend());
+                                        combo = CardCombo(strTemp);
+                                        hand = temp;
+                                        return combo;
+                                    }
+                                } while (std::prev_permutation(bitMask.begin(), bitMask.end()));
+                            } //end for(int a...)
+                        } //end for(int i ...)
+                    } //end if(str.size()...)
+                    str.clear();
+                    remainingCards.clear();
+                }
+                
+            //airPlanePair
+                str.clear();
+                remainingCards.clear();
+                //find possible cards that can for the trios in airPlane
+                startingIndex = 0;
+                for(int i = 0; i < hand.size(); i++) {
+                    if(!(hand[i].getRank() > two)) {
+                        startingIndex = i;
+                        break;
+                    }
+                }
+                
+                //find all continuous trios, and for each of such continuous trios
+                //check whether each subset can be the biggest
+                while(startingIndex < hand.size() - 6) {
+                    //find all continuous trios
+                    for(int i = 0; i < hand.size(); i++) {
+                        if(i >= startingIndex) {
+                            if(str.empty() ||
+                               (str.size() % 3 == 0 && hand[i].getRank() ==
+                                Rank(str[str.size()-1].getRank()-1)) ||
+                               ((str.size() % 3 == 1 || str.size() % 3 == 2)
+                                && hand[i] == str[str.size()-1])) {
+                                   str.push_back(hand[i]);
+                               } else {
+                                   startingIndex = i;
+                                   remainingCards.insert(remainingCards.end(),
+                                                         str.begin()+i,
+                                                         str.end());
+                                   break;
+                               }
+                        } else {
+                            remainingCards.push_back(hand[i]);
+                        }
+                    }
+                    
+                    while(str.size() % 3 != 0) {
+                        str.pop_back();
+                    }
+                    
+                    //iterate through the subsets by cutting the first couple of
+                    //elements of the last couple of elements or some of each
+                    if(str.size() >= 6) {
+                        int reducibleLength = (int)str.size() - 6;
+                        for(int i = 0; i <= reducibleLength; i += 3) {
+                            for(int a = 0; a < i; a += 3) {
+                                int b = i - a;
+                                indexUC = getIndexOfBiggest(cardsUnknown,
+                                                            trioPair, (int)
+                                                            (str.size()-i)/3);
+                                if(cardsUnknown[indexUC] > str[a]) {
+                                    break;
+                                }
+                                std::vector<Card> strTemp(str.begin()+a,
+                                                          str.begin()+
+                                                          (str.size()-1-b));
+                                
+                                //rCardsTemp stores all possible remainingCards
+                                //in this iteration
+                                std::vector<Card> rCardsTemp(
+                                    remainingCards.begin(),
+                                    remainingCards.end());
+                                rCardsTemp.insert(rCardsTemp.begin()+
+                                                  startingIndex,
+                                                  str.begin()+str.size()-b,
+                                                  str.end());
+                                rCardsTemp.insert(rCardsTemp.begin()+
+                                                  startingIndex,
+                                                  str.begin(),
+                                                  str.begin()+a);
+                                //find all pairs in remaining cards;
+                                std::vector<Card> pairs;
+                                std::vector<Card> nonPairs;
+                                pairs.push_back(rCardsTemp[0]);
+                                for(int j = 1; j < rCardsTemp.size(); j++) {
+                                    if(rCardsTemp[j] == pairs[pairs.size()-1]) {
+                                        pairs.push_back(rCardsTemp[i]);
+                                    } else {
+                                        if(pairs.size() % 2 == 1) {
+                                            nonPairs.push_back(pairs[pairs.size()-1]);
+                                            pairs.pop_back();
+                                        }
+                                        pairs.push_back(rCardsTemp[i]);
+                                    }
+                                }
+                                if(pairs.size() % 2 == 1) {
+                                    nonPairs.push_back(pairs[pairs.size()-1]);
+                                    pairs.pop_back();
+                                }
+                                
+                                if(pairs.size() >= (str.size()-i)/3) {
+                                    //need to find all combination of pairs as
+                                    //kick cards
+                                    std::string bitMask((str.size()-i)/3, 1);
+                                    bitMask.resize(pairs.size(), 0);
+                                    std::vector<Card> kickCards;
+                                    std::vector<Card> temp; //possible remaining cards temp+kickCards=rCardsTemp
+                                    
+                                    do {
+                                        kickCards.clear();
+                                        temp = nonPairs;
+                                        for(int i = 0; i < pairs.size(); i++) {
+                                            if(bitMask[i]) {
+                                                kickCards.push_back(pairs[2*i]);
+                                                kickCards.push_back(pairs[2*i+1]);
+                                            } else {
+                                                temp.push_back(pairs[2*i]);
+                                                temp.push_back(pairs[2*i+1]);
+                                            }
+                                        }
+                                        
+                                        std::sort(temp.rbegin(), temp.rend());
+                                        if(CardCombo(temp).getType() != error) {
+                                            strTemp.insert(strTemp.end(), kickCards.begin(), kickCards.end());
+                                            std::sort(strTemp.rbegin(), strTemp.rend());
+                                            combo = CardCombo(strTemp);
+                                            hand = temp;
+                                            return combo;
+                                        }
+                                    } while(std::prev_permutation(bitMask.begin(), bitMask.end()));
+                                }
+                            } //end for(int a...)
+                        } //end for(int i ...)
+                    } //end if(str.size()...)
+                    str.clear();
+                    remainingCards.clear();
+                }
             }
         }
-        
     }
     
     //if there are three combos left, and one of which is unbeatable
@@ -401,7 +891,7 @@ CardCombo SimpleBot::leadCard() {
     
     
     //else call findBestCards
-    
+    return findBestCards(hand);
 }
 
 CardCombo SimpleBot::playCard(const CardCombo &c) {
