@@ -231,6 +231,156 @@ int getIndexOfBiggest(const std::vector<Card> &cards, CardComboType type,
                 count = 1;
             }
         }
+        
+        return -1;
+    } else if (type == single) {
+        if(!cards.empty()) {
+            return 0;
+        } else {
+            return -1;
+        }
+    } else if (type == pair) {
+        for(int i = 1; i < cards.size(); i++) {
+            if(cards[i-1] == cards[i]) {
+                return i-1;
+            }
+        }
+        
+        return -1;
+    } else if (type == trio || type == trioSingle || type == trioPair) {
+        for(int i = 2; i < cards.size(); i++) {
+            if(cards[i] == cards[i-1] && cards[i-1] == cards[i-2]) {
+                return i-2;
+            }
+        }
+        
+        return -1;
+    } else if (type == straight) {
+        std::vector<Card> str;
+        int leadingIndex = -1;
+        
+        for(int i = 0; i < cards.size(); i++) {
+            if(cards[i].getRank() < two) {
+                leadingIndex = i;
+                str.push_back(cards[i]);
+                break;
+            }
+        }
+        
+        if(leadingIndex == -1) {
+            return -1;
+        }
+        
+        for(int i = leadingIndex + 1; i < cards.size(); i++) {
+            if(cards[i].getRank() == Rank(str[str.size()-1].getRank() - 1)) {
+                str.push_back(cards[i]);
+                if(str.size() == length) {
+                    return leadingIndex;
+                }
+            } else if (cards[i] == str[str.size() - 1]){
+                continue;
+            } else {
+                str.clear();
+                str.push_back(cards[i]);
+                leadingIndex = i;
+            }
+        }
+        
+        return -1;
+    } else if (type == pairStraight) {
+        std::vector<Card> pairStr;
+        int leadingIndex = -1;
+        
+        for(int i = 0; i < cards.size(); i++) {
+            if(cards[i].getRank() < two) {
+                leadingIndex = i;
+                pairStr.push_back(cards[i]);
+                break;
+            }
+        }
+        
+        if(leadingIndex == -1) {
+            return -1;
+        }
+        
+        for(int i = leadingIndex + 1; i < cards.size(); i++) {
+            if(pairStr.size() % 2 == 0) {
+                if(cards[i].getRank() ==
+                   Rank(pairStr[pairStr.size()-1].getRank() - 1)) {
+                    pairStr.push_back(cards[i]);
+                } else if (cards[i] == pairStr[pairStr.size() - 1]) {
+                    continue;
+                } else {
+                    pairStr.clear();
+                    pairStr.push_back(cards[i]);
+                    leadingIndex = i;
+                }
+            } else {
+                if(cards[i] == pairStr[pairStr.size() - 1]) {
+                    pairStr.push_back(cards[i]);
+                    if(pairStr.size()/2 == length) {
+                        return leadingIndex;
+                    }
+                } else {
+                    pairStr.clear();
+                    pairStr.push_back(cards[i]);
+                    leadingIndex = i;
+                }
+            }
+        }
+        
+        return -1;
+    } else if (type == trioStraight || type == airplaneSingle ||
+               type == airplanePair) {
+        std::vector<Card> trioStr;
+        int leadingIndex = -1;
+        
+        for(int i = 0; i < cards.size(); i++) {
+            if(cards[i].getRank() < bJoker) {
+                leadingIndex = i;
+                trioStr.push_back(cards[i]);
+                break;
+            }
+        }
+        
+        if(leadingIndex == -1) {
+            return -1;
+        }
+        
+        for(int i = leadingIndex + 1; i < cards.size(); i++) {
+            if(trioStr.size() % 3 == 0) {
+                if(cards[i].getRank() ==
+                   Rank(trioStr[trioStr.size()-1].getRank() - 1)) {
+                    trioStr.push_back(cards[i]);
+                } else if (cards[i] == trioStr[trioStr.size()-1]){
+                    continue;
+                } else {
+                    trioStr.clear();
+                    leadingIndex = i;
+                    trioStr.push_back(cards[i]);
+                }
+            } else if (trioStr.size() % 3 == 1) {
+                if(cards[i] == trioStr[trioStr.size()-1]) {
+                    trioStr.push_back(cards[i]);
+                } else {
+                    trioStr.clear();
+                    leadingIndex = i;
+                    trioStr.push_back(cards[i]);
+                }
+            } else {
+                if(cards[i] == trioStr[trioStr.size()-1]) {
+                    trioStr.push_back(cards[i]);
+                    if(trioStr.size()/3 == length) {
+                        return leadingIndex;
+                    }
+                } else {
+                    trioStr.clear();
+                    leadingIndex = i;
+                    trioStr.push_back(cards[i]);
+                }
+            }
+        }
+        
         return -1;
     }
     
@@ -287,7 +437,7 @@ int SimpleBot::bid(int currentBid) {
 CardCombo SimpleBot::findBestCards(std::vector<Card> &hand) {
     //play airPlaneSingle, airplanePair, trioSingle, trioPair first
     //best they can take other cards with them
-    //then play cards with the lowest value 
+    //then play cards with the lowest value
     
     return CardCombo();
 }
@@ -534,7 +684,7 @@ CardCombo SimpleBot::leadCard() {
                 remainingCards.clear();
                 startingIndex = 0;
                 for(int i = 0; i < hand.size(); i++) {
-                    if(!(hand[i].getRank() > ace)) {
+                    if(!(hand[i].getRank() > two)) {
                         startingIndex = i;
                         break;
                     }
@@ -664,7 +814,7 @@ CardCombo SimpleBot::leadCard() {
                 remainingCards.clear();
                 startingIndex = 0;
                 for(int i = 0; i < hand.size(); i++) {
-                    if(!(hand[i].getRank() > ace)) {
+                    if(!(hand[i].getRank() > two)) {
                         startingIndex = i;
                         break;
                     }
@@ -700,7 +850,7 @@ CardCombo SimpleBot::leadCard() {
                             for(int a = 0; a < i; a += 3) {
                                 int b = i - a;
                                 indexUC = getIndexOfBiggest(cardsUnknown,
-                                                            trioSingle, (int)
+                                                            airplaneSingle, (int)
                                                             (str.size()-i)/3);
                                 if(cardsUnknown[indexUC] > str[a]) {
                                     break;
@@ -802,7 +952,7 @@ CardCombo SimpleBot::leadCard() {
                             for(int a = 0; a < i; a += 3) {
                                 int b = i - a;
                                 indexUC = getIndexOfBiggest(cardsUnknown,
-                                                            trioPair, (int)
+                                                            airplanePair, (int)
                                                             (str.size()-i)/3);
                                 if(cardsUnknown[indexUC] > str[a]) {
                                     break;
