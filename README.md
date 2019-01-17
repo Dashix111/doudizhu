@@ -32,3 +32,6 @@ Note: a player passing on one turn does not prevent the player from playing on t
 12. Quad with Singles: a quad with 2 other cards of the different kind, e.g. 3-4-2-2-2-2. Rank from 3 to 2. Quad with Singles do not have the ability of the bomb to beat cards of other combinaitons. 
 13. Quad with Pairs: a quad with 2 different Pairs, e.g. 3-3-4-4-4-4-5-5. Rank from 3 to 2. Quad with Singles do not have the ability of the bomb to beat cards of other combinations. 
 14. Rockets: Black Joker with Red Joker. A rocket can beat any combination of cards. 
+
+#### Scoring
+The basic score of each game is the highest bid number. The score doubles for each Bomb and Rocket played. If the landlord wins, each of the other 2 plays will give to the landlord the same number of points as the score. If the landlord loses, the landlord with give to each player the same number of points as the score. 
